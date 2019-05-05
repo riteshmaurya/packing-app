@@ -1,11 +1,11 @@
 package com.rm.packplanner.utils;
 
 public class ItemConfig {
-	
+
 	private double length;
-	
+
 	private int quantity;
-		
+
 	private double weight;
 
 	public double getLength() {
@@ -36,7 +36,5 @@ public class ItemConfig {
 	public String toString() {
 		return "ItemConfig [length=" + length + ", quantity=" + quantity + ", weight=" + weight + "]";
 	}
-	
-	
 
 }

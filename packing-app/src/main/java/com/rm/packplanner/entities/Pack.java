@@ -14,6 +14,8 @@ public class Pack {
 
 	private double remainingWeight;
 
+	private double packTotalWeight;
+
 	private double packLength;
 
 	private int maxSize;
@@ -26,7 +28,7 @@ public class Pack {
 		this.packId = IdCreator.createID();
 		this.sortOrder = s.getSortOrder();
 		this.maxSize = s.getMaxItems();
-		this.remainingWeight = Double.valueOf(s.getMaxWeight());
+		this.remainingWeight = s.getMaxWeight();
 		this.itemArray = new Item[s.getMaxItems()];
 		this.top = -1;
 	}
@@ -34,6 +36,7 @@ public class Pack {
 	public void push(Item item) {
 		itemArray[++top] = item;
 		this.remainingWeight = this.remainingWeight - item.getWeight();
+		this.packTotalWeight = this.packTotalWeight + item.getWeight();
 	}
 
 	public Item pop() {
@@ -78,11 +81,16 @@ public class Pack {
 	}
 
 	public double getRemainingWeight() {
-		return remainingWeight < 0 ? 0 : remainingWeight;
+		return remainingWeight;
+		// return remainingWeight < 0 ? 0 : remainingWeight;
 	}
 
 	public void setRemainingWeight(double remainingWeight) {
 		this.remainingWeight = remainingWeight;
+	}
+
+	public double getPackTotalWeight() {
+		return packTotalWeight;
 	}
 
 	public double getPackLength() {
@@ -121,8 +129,8 @@ public class Pack {
 	@Override
 	public String toString() {
 		return "Pack [packId=" + packId + ", sortOrder=" + sortOrder + ", remainingWeight=" + remainingWeight
-				+ ", packLength=" + packLength + ", maxSize=" + maxSize + ", itemArray=" + Arrays.toString(itemArray)
-				+ ", top=" + top + "]";
+				+ ", packTotalWeight=" + packTotalWeight + ", packLength=" + packLength + ", itemArray="
+				+ Arrays.toString(itemArray) + "]";
 	}
 
 }

@@ -6,7 +6,6 @@ public class Item {
 
 	private double length;
 
-
 	private double weight;
 
 	/**
