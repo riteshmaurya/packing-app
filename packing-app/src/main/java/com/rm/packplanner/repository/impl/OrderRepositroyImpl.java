@@ -3,12 +3,15 @@ package com.rm.packplanner.repository.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.stereotype.Repository;
+
 import com.rm.packplanner.entities.Item;
 import com.rm.packplanner.entities.OrderMaster;
 import com.rm.packplanner.repository.OrderRepository;
 import com.rm.packplanner.utils.IdCreator;
 import com.rm.packplanner.utils.ItemConfig;
 
+@Repository
 public class OrderRepositroyImpl implements OrderRepository {
 
 	@Override

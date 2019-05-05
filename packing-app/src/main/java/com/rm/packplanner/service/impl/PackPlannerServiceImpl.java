@@ -8,20 +8,26 @@ import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.rm.packplanner.constants.PackPlannerConstants.SortOrder;
 import com.rm.packplanner.entities.Item;
 import com.rm.packplanner.entities.OrderMaster;
 import com.rm.packplanner.entities.Pack;
 import com.rm.packplanner.repository.OrderRepository;
-import com.rm.packplanner.repository.impl.OrderRepositroyImpl;
 import com.rm.packplanner.service.PackPlannerService;
 import com.rm.packplanner.utils.ItemConfig;
 import com.rm.packplanner.utils.PackConfig;
 
+@Service
 public class PackPlannerServiceImpl implements PackPlannerService {
 
-	static OrderRepository orderRepository = new OrderRepositroyImpl();
+	@Autowired
+	private OrderRepository orderRepository;
+	
 	private PackConfig packConfig;
+	
 	private OrderMaster orderMaster;
 
 	@Override
@@ -86,7 +92,6 @@ public class PackPlannerServiceImpl implements PackPlannerService {
 		maxWeightPerPack = input.split(",")[2].trim();
 
 		// create pack config
-		// PackConfig packConfig;
 		packConfig = new PackConfig(SortOrder.valueOf(sortOrder.toUpperCase()), Integer.valueOf(maxPiecesPerPack),
 				Double.valueOf(maxWeightPerPack));
 
@@ -119,8 +124,6 @@ public class PackPlannerServiceImpl implements PackPlannerService {
 		itemQuantity = input.split(",")[1].trim();
 		pieceWeight = input.split(",")[2].trim();
 
-		// orderMaster
-
 		ItemConfig itemConfig = new ItemConfig();
 		itemConfig.setLength(Double.valueOf(itemLength));
 		itemConfig.setQuantity(Integer.valueOf(itemQuantity));
@@ -129,7 +132,7 @@ public class PackPlannerServiceImpl implements PackPlannerService {
 		if (!(itemConfig.getWeight() > Double.valueOf(packConfig.getMaxWeight())))
 			itemConfigs.add(itemConfig);
 		else
-			System.out.println("Weigth of each item should be less than weigh of Pack. This item is rejected");
+			System.err.println("Weigth of each item should be less than weigh of Pack. This item is rejected");
 
 		System.out.println(itemConfig);
 		System.out.println("Do you want to add more items? Enter Y or N: ");
@@ -148,5 +151,10 @@ public class PackPlannerServiceImpl implements PackPlannerService {
 
 	public OrderMaster getOrderMaster() {
 		return orderMaster;
+	}
+	
+	public void packItems(PackPlannerService packPlannerService) {
+		packPlannerService.packingItemsBySortOrder(packPlannerService.getOrderMaster(),
+				packPlannerService.getPackConfig());
 	}
 }
