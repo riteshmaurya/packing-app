@@ -8,20 +8,26 @@ import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.rm.packplanner.constants.PackPlannerConstants.SortOrder;
 import com.rm.packplanner.entities.Item;
 import com.rm.packplanner.entities.OrderMaster;
 import com.rm.packplanner.entities.Pack;
 import com.rm.packplanner.repository.OrderRepository;
-import com.rm.packplanner.repository.impl.OrderRepositroyImpl;
 import com.rm.packplanner.service.PackPlannerService;
 import com.rm.packplanner.utils.ItemConfig;
 import com.rm.packplanner.utils.PackConfig;
 
+@Service
 public class PackPlannerServiceImpl implements PackPlannerService {
 
-	static OrderRepository orderRepository = new OrderRepositroyImpl();
+	@Autowired
+	private OrderRepository orderRepository;
+
 	private PackConfig packConfig;
+
 	private OrderMaster orderMaster;
 
 	@Override
@@ -44,7 +50,7 @@ public class PackPlannerServiceImpl implements PackPlannerService {
 
 		// create start filling packs based on number of items from packConfig
 		// and maxweight from packConfig
-		while (orderMaster.getItems().size() > 0) {
+		while (orderMaster != null && orderMaster.getItems().size() > 0) {
 			// create pack
 			Pack pack = new Pack(packConfig);
 			// fill length wise sorted items
@@ -81,27 +87,31 @@ public class PackPlannerServiceImpl implements PackPlannerService {
 				"Enter pack specification in this order: [Sort order],[max pieces per pack],[max weight per pack] ");
 		String input = sc.nextLine();
 		System.out.println(input);
-		sortOrder = input.split(",")[0].trim();
-		maxPiecesPerPack = input.split(",")[1].trim();
-		maxWeightPerPack = input.split(",")[2].trim();
-
-		// create pack config
-		// PackConfig packConfig;
-		packConfig = new PackConfig(SortOrder.valueOf(sortOrder.toUpperCase()), Integer.valueOf(maxPiecesPerPack),
-				Double.valueOf(maxWeightPerPack));
+		try {
+			sortOrder = input.split(",")[0].trim();
+			maxPiecesPerPack = input.split(",")[1].trim();
+			maxWeightPerPack = input.split(",")[2].trim();
+			// create pack config
+			packConfig = new PackConfig(SortOrder.valueOf(sortOrder.toUpperCase()), Integer.valueOf(maxPiecesPerPack),
+					Double.valueOf(maxWeightPerPack));
+		} catch (Exception e) {
+			System.err.println("Input not valid. please correct and re enter!");
+			parseInputForPack();
+		}
 
 		System.out.println(packConfig);
 
 		// create list of items for packing
 		List<ItemConfig> itemConfig = new ArrayList<>();
 		parseInputForItems(itemConfig, packConfig);
+		if (itemConfig.size() > 0) {
+			orderMaster = orderRepository.generateOrder(itemConfig);
 
-		orderMaster = orderRepository.generateOrder(itemConfig);
+			System.out.println(orderMaster);
 
-		System.out.println(orderMaster);
-
-		for (Item item : orderMaster.getItems()) {
-			System.out.println(item);
+			for (Item item : orderMaster.getItems()) {
+				System.out.println(item);
+			}
 		}
 
 		sc.close();
@@ -112,29 +122,31 @@ public class PackPlannerServiceImpl implements PackPlannerService {
 		System.out.println("Enter Items in this order:: itemLength, itemQuantity, pieceWeight,");
 		String itemLength, itemQuantity, pieceWeight;
 		Scanner sc = new Scanner(System.in);
-		String input = sc.nextLine();
+		String input = sc.hasNextLine() ? sc.nextLine() : "@@@@@";
 		System.out.println(input);
-
-		itemLength = input.split(",")[0].trim();
-		itemQuantity = input.split(",")[1].trim();
-		pieceWeight = input.split(",")[2].trim();
-
-		// orderMaster
-
 		ItemConfig itemConfig = new ItemConfig();
-		itemConfig.setLength(Double.valueOf(itemLength));
-		itemConfig.setQuantity(Integer.valueOf(itemQuantity));
-		itemConfig.setWeight(Double.valueOf(pieceWeight));
+		try {
+			itemLength = input.split(",")[0].trim();
+			itemQuantity = input.split(",")[1].trim();
+			pieceWeight = input.split(",")[2].trim();
 
-		if (!(itemConfig.getWeight() > Double.valueOf(packConfig.getMaxWeight())))
+			itemConfig.setLength(Double.valueOf(itemLength));
+			itemConfig.setQuantity(Integer.valueOf(itemQuantity));
+			itemConfig.setWeight(Double.valueOf(pieceWeight));
+		} catch (Exception ex) {
+			System.err.println("Input not valid. please correct and re enter!");
+			parseInputForItems(itemConfigs, packConfig);
+		}
+
+		if (!(itemConfig.getWeight() > Double.valueOf(packConfig.getMaxWeight()))) {
 			itemConfigs.add(itemConfig);
-		else
-			System.out.println("Weigth of each item should be less than weigh of Pack. This item is rejected");
+			System.out.println(itemConfig);
+		} else
+			System.err.println("Weigth of an item should be less than max weight of Pack. This item is rejected");
 
-		System.out.println(itemConfig);
 		System.out.println("Do you want to add more items? Enter Y or N: ");
 
-		String flag = sc.next();
+		String flag = sc.hasNext() ? sc.next() : "no";
 		if (("Y").equalsIgnoreCase(flag)) {
 			parseInputForItems(itemConfigs, packConfig);
 		}
@@ -148,5 +160,10 @@ public class PackPlannerServiceImpl implements PackPlannerService {
 
 	public OrderMaster getOrderMaster() {
 		return orderMaster;
+	}
+
+	public void packItems(PackPlannerService packPlannerService) {
+		packPlannerService.packingItemsBySortOrder(packPlannerService.getOrderMaster(),
+				packPlannerService.getPackConfig());
 	}
 }

@@ -18,5 +18,7 @@ public interface PackPlannerService {
 	PackConfig getPackConfig();
 
 	OrderMaster getOrderMaster();
+	
+	void packItems(PackPlannerService packPlannerService);
 
 }

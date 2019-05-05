@@ -1,21 +1,26 @@
 package com.rm.motiondesign;
 
-import com.rm.packplanner.service.PackPlannerService;
-import com.rm.packplanner.service.impl.PackPlannerServiceImpl;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.ComponentScan;
 
+import com.rm.packplanner.service.PackPlannerService;
+
+@SpringBootApplication
+@ComponentScan("com")
 public class PackingAppApplication {
 
-	private static PackPlannerService packPlannerService = new PackPlannerServiceImpl();
 
 	public static void main(String[] args) {
-
+		ApplicationContext context = SpringApplication.run(PackingAppApplication.class, args);
+		PackPlannerService packPlannerService = context.getBean(PackPlannerService.class);
+		
 		packPlannerService.parseInputForPack();
-		packItems();
+		
+		packPlannerService.packItems(packPlannerService);
 	}
 
-	public static void packItems() {
-		packPlannerService.packingItemsBySortOrder(packPlannerService.getOrderMaster(),
-				packPlannerService.getPackConfig());
-	}
+
 
 }
