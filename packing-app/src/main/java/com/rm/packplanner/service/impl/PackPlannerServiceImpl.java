@@ -109,9 +109,8 @@ public class PackPlannerServiceImpl implements PackPlannerService {
 
 			System.out.println(orderMaster);
 
-			for (Item item : orderMaster.getItems()) {
-				System.out.println(item);
-			}
+			orderMaster.getItems().stream().forEach(System.out::println);
+
 		}
 
 		sc.close();
